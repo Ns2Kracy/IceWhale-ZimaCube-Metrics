@@ -1,0 +1,90 @@
+openapi: 3.1.0
+
+info:
+  title: ZimaCube Monitoring API
+  version: v2
+
+servers:
+  - url: /v2/metrics
+
+security:
+  - access_token: []
+
+paths:
+  /:
+    get:
+      summary: Get the service metrics of ZimaCube
+      operationId: getMetrics
+      responses:
+        "200":
+          $ref: "#/components/responses/ResponseZimaCubeMetricsOK"
+        "400":
+          $ref: "#/components/responses/ResponeBadRequest"
+        "500":
+          $ref: "#/components/responses/ResponseInternalServerError"
+
+components:
+  securitySchemes:
+    access_token:
+      type: apiKey
+      in: header
+      name: Authorization
+
+  responses:
+    ResponseOK:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BaseResponse"
+
+    ResponeBadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BaseResponse"
+
+    ResponseInternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BaseResponse"
+
+    ResponseZimaCubeMetricsOK:
+      description: Metrics of ZimaCube
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ZimaCubeMetrics"
+
+  schemas:
+    BaseResponse:
+      properties:
+        message:
+          description: message returned by server side if there is any
+          type: string
+
+    ZimaCubeMetrics:
+      properties:
+        ip:
+          description: IP address of the server
+          type: string
+        metrics:
+          description: Metrics of the server
+          type: array
+          items:
+            $ref: "#/components/schemas/Metric"
+
+    Metric:
+      properties:
+        name:
+          description: Name of the service
+          type: string
+        cpu:
+          description: CPU usage of the server
+          type: number
+        mem:
+          description: Memory usage of the server
+          type: number
