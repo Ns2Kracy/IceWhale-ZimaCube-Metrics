@@ -7,12 +7,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "@nextui-org/react";
-
 import axios from "axios";
+
 import { useEffect, useState } from "react";
 
-const baseURL = "localhost:80";
-const metricsAPI = `${baseURL}/api/metrics/`;
+const baseURL = "http://10.0.0.85";
+const metricsAPI = `${baseURL}/v2/metrics/`;
 
 interface Metrics {
 	name: string;
@@ -31,7 +31,8 @@ const DataTable = () => {
 		const fetchData = async () => {
 			try {
 				const response = await axios.get(metricsAPI);
-				setData(response.data);
+				const data = response.data;
+				setData(data.data);
 			} catch (error) {
 				console.error("Error fetching data:", error);
 			}
@@ -45,7 +46,7 @@ const DataTable = () => {
 
 	return (
 		<Card>
-			<Table>
+			<Table aria-labelledby="IceWhale ZimaCube Metrics">
 				<TableHeader>
 					<TableColumn>服务名称</TableColumn>
 					<TableColumn>当前 CPU</TableColumn>

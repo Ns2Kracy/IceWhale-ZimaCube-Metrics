@@ -63,7 +63,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ZimaCubeMetrics"
+            allOf: 
+              - $ref: "#/components/schemas/BaseResponse"
+              - properties: 
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Metric"
 
   schemas:
     BaseResponse:
