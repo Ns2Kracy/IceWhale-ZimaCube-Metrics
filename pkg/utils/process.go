@@ -3,7 +3,10 @@ package utils
 import (
 	"fmt"
 	"os/exec"
+	"strconv"
 	"strings"
+
+	"github.com/shirou/gopsutil/v4/process"
 )
 
 func GetPid(service string) string {
@@ -16,18 +19,28 @@ func GetPid(service string) string {
 	return strings.TrimSpace(string(output))
 }
 
-
-func GetProcessInfo(pid string) (string, string) {
-	cmd := exec.Command("ps", "-p", pid, "-o", "pcpu=,pmem=")
-	output, err := cmd.Output()
+func GetProcessInfo(processPid string) (string, string) {
+	pid, _ := strconv.ParseInt(processPid, 10, 32)
+	p, err := process.NewProcess(int32(pid))
 	if err != nil {
-		fmt.Println("Error running ps command:", err)
+		fmt.Println("Error getting process info:", err)
 		return "", ""
 	}
 
-	out := string(output)
-	lines := strings.Split(out, "\n")
-	fields := strings.Fields(lines[0])
+	cpu, err := p.CPUPercent()
+	if err != nil {
+		fmt.Println("Error getting CPU percent:", err)
+		return "", ""
+	}
 
-	return fields[0], fields[1]
+	memoryInfo, err := p.MemoryInfo()
+	memUsage := memoryInfo.RSS
+
+	if err != nil {
+		fmt.Println("Error getting memory percent:", err)
+		return "", ""
+	}
+
+	// Convert to MB
+	return fmt.Sprintf("%.2f", cpu), fmt.Sprintf("%.2f", float64(memUsage)/1024/1024)
 }
