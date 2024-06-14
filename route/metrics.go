@@ -1,7 +1,14 @@
 package route
 
-import "github.com/labstack/echo/v4"
+import (
+	"net/http"
 
-func (m *Metrics) GetMetrics(c echo.Context) error {
-	return c.JSON(200, "Metrics")
+	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/service"
+	"github.com/labstack/echo/v4"
+)
+
+func (m *MetricsRoute) GetMetrics(c echo.Context) error {
+	metrics := service.MyService.Metrics().GetMetrics()
+
+	return c.JSON(http.StatusOK, metrics)
 }

@@ -4,14 +4,24 @@ package main
 
 import (
 	_ "embed"
+	"flag"
+	"fmt"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/IceWhaleTech/CasaOS-Common/model"
+	"github.com/IceWhaleTech/CasaOS-Common/utils/file"
+	util_http "github.com/IceWhaleTech/CasaOS-Common/utils/http"
+	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
+	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/common"
 	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/config"
+	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/pkg/sqlite"
 	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/route"
 	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/service"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -29,6 +39,27 @@ var (
 )
 
 func main() {
+	dbFlag := flag.String("db", "", "db path")
+	versionFlag := flag.Bool("v", false, "version")
+
+	flag.Parse()
+
+	if *versionFlag {
+		fmt.Printf("v%s\n", common.Version)
+		os.Exit(0)
+	}
+
+	println("git commit:", commit)
+	println("build date:", date)
+
+	if len(*dbFlag) == 0 {
+		*dbFlag = config.AppInfo.DBPath
+	}
+
+	logger.LogInit(config.AppInfo.LogPath, config.AppInfo.LogSaveName, config.AppInfo.LogFileExt)
+
+	sqliteDB = sqlite.GetDB(*dbFlag)
+
 	service.Initialize(config.CommonInfo.RuntimePath)
 
 	// setup listener
@@ -37,21 +68,51 @@ func main() {
 		panic(_err)
 	}
 
+	urlFilePath := filepath.Join(config.CommonInfo.RuntimePath, "zimacube-metrics.url")
+	if err := file.CreateFileAndWriteContent(urlFilePath, "http://"+listener.Addr().String()); err != nil {
+		logger.Error("error when creating address file", zap.Error(err),
+			zap.Any("address", listener.Addr().String()),
+			zap.Any("filepath", urlFilePath),
+		)
+	}
+
 	// initialize routers and register at gateway
-	if err := service.Gateway.CreateRoute(&model.Route{
-		Path:   route.APIPath,
-		Target: "http://" + listener.Addr().String(),
-	}); err != nil {
-		panic(err)
+	apiPaths := []string{
+		route.APIPath,
+		route.DocPath,
+	}
+
+	for _, apiPath := range apiPaths {
+		if err := service.MyService.Gateway().CreateRoute(&model.Route{
+			Path:   apiPath,
+			Target: "http://" + listener.Addr().String(),
+		}); err != nil {
+			panic(err)
+		}
+	}
+
+	service.MyService.Metrics().DB = sqliteDB
+	go service.MyService.Metrics().Monitor()
+
+	router := route.GetRouter()
+	docRouter := route.GetDocRouter(_docHTML, _docYAML)
+
+	mux := &util_http.HandlerMultiplexer{
+		HandlerMap: map[string]http.Handler{
+			"v2":  router,
+			"doc": docRouter,
+		},
 	}
 
 	s := &http.Server{
-		Handler:           route.GetRouter(),
+		Handler:           mux,
 		ReadHeaderTimeout: 5 * time.Second, // fix G112: Potential slowloris attack (see https://github.com/securego/gosec)
 	}
 
-	_err = s.Serve(listener) // not using http.serve() to fix G114: Use of net/http serve function that has no support for setting timeouts (see https://github.com/securego/gosec)
+	_err = s.Serve(listener) // not using http.serve() to fix G114: Use of net/http serve function that has no support for setting timeouts (see
 	if _err != nil {
 		panic(_err)
 	}
+
+	go service.MyService.Metrics().Monitor()
 }

@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.3
 
 info:
   title: ZimaCube Monitoring API
@@ -10,11 +10,17 @@ servers:
 security:
   - access_token: []
 
+tags:
+  - name: ZimaCube Metrics
+    description: Get the service metrics of ZimaCube
+
 paths:
   /:
     get:
       summary: Get the service metrics of ZimaCube
       operationId: getMetrics
+      tags:
+        - ZimaCube Metrics
       responses:
         "200":
           $ref: "#/components/responses/ResponseZimaCubeMetricsOK"
@@ -82,9 +88,28 @@ components:
         name:
           description: Name of the service
           type: string
+          example: "zimaos"
         cpu:
           description: CPU usage of the server
-          type: number
+          type: string
+          example: 0.5%
         mem:
           description: Memory usage of the server
-          type: number
+          type: string
+          example: 0.5%
+        max_cpu:
+          description: Maximum CPU usage of the server in the last 1 hour
+          type: string
+          example: 5%
+        avg_cpu:
+          description: Average CPU usage of the server in the last 1 hour
+          type: string
+          example: 5%
+        max_mem:
+          description: Maximum Memory usage of the server in the last 1 hour
+          type: string
+          example: 5%
+        avg_mem:
+          description: Average Memory usage of the server in the last 1 hour
+          type: string
+          example: 5%

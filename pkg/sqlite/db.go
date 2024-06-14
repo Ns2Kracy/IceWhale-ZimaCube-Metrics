@@ -19,7 +19,7 @@ func GetDB(dbPath string) *gorm.DB {
 	}
 
 	_ = file.IsNotExistMkDir(dbPath)
-	db, err := gorm.Open(sqlite.Open(dbPath+"/user.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(dbPath+"/metrics.db"), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}

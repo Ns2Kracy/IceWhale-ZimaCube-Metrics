@@ -6,6 +6,17 @@ import (
 	"strings"
 )
 
+func GetPid(service string) string {
+	cmd := exec.Command("pidof", service)
+	output, err := cmd.Output()
+	if err != nil {
+		return "-1"
+	}
+
+	return strings.TrimSpace(string(output))
+}
+
+
 func GetProcessInfo(pid string) (string, string) {
 	cmd := exec.Command("ps", "-p", pid, "-o", "pcpu=,pmem=")
 	output, err := cmd.Output()
