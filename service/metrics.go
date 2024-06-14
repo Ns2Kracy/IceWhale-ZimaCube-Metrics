@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/codegen"
@@ -70,15 +71,19 @@ func (m *Metrics) GetMaxCPU(serviceName string) string {
 	// Get the max cpu and mem from the database in the last 1 hour
 	m.DB.Where("name = ? AND created_at > ?", serviceName, time.Now().Add(-1*time.Hour)).Order("cpu desc").First(&metrics)
 
-	return metrics.CPU + "%"
+	maxCPU, _ := strconv.ParseFloat(metrics.CPU, 64)
+
+	return fmt.Sprintf("%.2f", maxCPU) + "%"
 }
 
 func (m *Metrics) GetAvgCPU(serviceName string) string {
 	var metrics model.MetricDBModel
 	// Get the average cpu from the database
-	m.DB.Where("name = ?", serviceName).Select("AVG(cpu)").Find(&metrics)
+	m.DB.Raw("SELECT AVG(cpu) as cpu FROM o_metrics WHERE name = ?", serviceName).Scan(&metrics)
 
-	return metrics.CPU + "%"
+	avgCPU, _ := strconv.ParseFloat(metrics.CPU, 64)
+
+	return fmt.Sprintf("%.2f", avgCPU) + "%"
 }
 
 func (m *Metrics) GetMaxMem(serviceName string) string {
@@ -86,15 +91,19 @@ func (m *Metrics) GetMaxMem(serviceName string) string {
 	// Get the max cpu and mem from the database in the last 5 minutes
 	m.DB.Where("name = ? AND created_at > ?", serviceName, time.Now().Add(-5*time.Minute)).Order("mem desc").First(&metrics)
 
-	return metrics.MEM + " MB"
+	maxMem, _ := strconv.ParseFloat(metrics.MEM, 64)
+
+	return fmt.Sprintf("%.2f", maxMem) + " MB"
 }
 
 func (m *Metrics) GetAvgMem(serviceName string) string {
 	var metrics model.MetricDBModel
 	// Get the average mem from the database
-	m.DB.Select("AVG(mem)").Where("name = ?", serviceName).Find(&metrics)
+	m.DB.Raw("SELECT AVG(mem) as mem FROM o_metrics WHERE name = ?", serviceName).Scan(&metrics)
 
-	return metrics.MEM + " MB"
+	avgMem, _ := strconv.ParseFloat(metrics.MEM, 64)
+
+	return fmt.Sprintf("%.2f", avgMem) + " MB"
 }
 
 func (m *Metrics) GetMetrics() []codegen.Metric {
