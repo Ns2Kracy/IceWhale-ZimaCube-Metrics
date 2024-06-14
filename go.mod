@@ -6,6 +6,7 @@ require (
 	github.com/IceWhaleTech/CasaOS-Common v0.4.8
 	github.com/getkin/kin-openapi v0.125.0
 	github.com/labstack/echo/v4 v4.12.0
+	github.com/shirou/gopsutil/v4 v4.24.5
 	go.uber.org/zap v1.27.0
 	gopkg.in/ini.v1 v1.67.0
 	gorm.io/driver/sqlite v1.5.6
@@ -17,7 +18,6 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
-	github.com/shirou/gopsutil/v4 v4.24.5 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect

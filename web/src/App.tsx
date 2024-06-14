@@ -1,35 +1,85 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import {
+	Card,
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
+} from "@nextui-org/react";
 
-function App() {
-  const [count, setCount] = useState(0)
+import axios from "axios";
+import { useEffect, useState } from "react";
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+const baseURL = "localhost:80";
+const metricsAPI = `${baseURL}/api/metrics/`;
+
+interface Metrics {
+	name: string;
+	cpu: string;
+	avg_cpu: string;
+	max_cpu: string;
+	mem: string;
+	avg_mem: string;
+	max_mem: string;
 }
 
-export default App
+const DataTable = () => {
+	const [data, setData] = useState([]);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await axios.get(metricsAPI);
+				setData(response.data);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+			}
+		};
+
+		fetchData();
+		const intervalId = setInterval(fetchData, 1000); // 每秒获取一次数据
+
+		return () => clearInterval(intervalId); // 清除定时器以防止内存泄漏
+	}, []);
+
+	return (
+		<Card>
+			<Table>
+				<TableHeader>
+					<TableColumn>服务名称</TableColumn>
+					<TableColumn>当前 CPU</TableColumn>
+					<TableColumn>平均 CPU</TableColumn>
+					<TableColumn>最大 CPU</TableColumn>
+					<TableColumn>当前内存</TableColumn>
+					<TableColumn>平均内存</TableColumn>
+					<TableColumn>最大内存</TableColumn>
+				</TableHeader>
+				<TableBody>
+					{data.map((item: Metrics, index: number) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+						<TableRow key={index}>
+							<TableCell>{item.name}</TableCell>
+							<TableCell>{item.cpu}</TableCell>
+							<TableCell>{item.avg_cpu}</TableCell>
+							<TableCell>{item.max_cpu}</TableCell>
+							<TableCell>{item.mem}</TableCell>
+							<TableCell>{item.avg_mem}</TableCell>
+							<TableCell>{item.max_mem}</TableCell>
+						</TableRow>
+					))}
+				</TableBody>
+			</Table>
+		</Card>
+	);
+};
+
+function App() {
+	return (
+		<>
+			<DataTable />
+		</>
+	);
+}
+
+export default App;
