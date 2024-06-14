@@ -40,9 +40,12 @@ var (
 
 func main() {
 	dbFlag := flag.String("db", "", "db path")
+	reportFlag := flag.Bool("r", false, "report")
 	versionFlag := flag.Bool("v", false, "version")
 
 	flag.Parse()
+
+	webhookURL := os.Getenv("WEBHOOK_URL")
 
 	if *versionFlag {
 		fmt.Printf("v%s\n", common.Version)
@@ -93,6 +96,9 @@ func main() {
 
 	service.MyService.Metrics().DB = sqliteDB
 	go service.MyService.Metrics().Monitor()
+	if *reportFlag {
+		go service.MyService.Metrics().ReportFeiShu(webhookURL)
+	}
 
 	router := route.GetRouter()
 	docRouter := route.GetDocRouter(_docHTML, _docYAML)
@@ -113,6 +119,4 @@ func main() {
 	if _err != nil {
 		panic(_err)
 	}
-
-	go service.MyService.Metrics().Monitor()
 }

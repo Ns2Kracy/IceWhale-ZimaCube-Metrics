@@ -45,8 +45,36 @@ func AssembleMessage(rows string) string {
 					"align": "center"
 				},
 				{
+					"name": "Max CPU",
+					"display_name": "Max CPU",
+					"data_type": "text",
+					"width": "auto",
+					"align": "center"
+				},
+				{
+					"name": "Avg CPU",
+					"display_name": "Avg CPU",
+					"data_type": "text",
+					"width": "auto",
+					"align": "center"
+				},
+				{
 					"name": "MEM",
 					"display_name": "MEM",
+					"data_type": "text",
+					"width": "auto",
+					"align": "center"
+				},
+				{
+					"name": "Max MEM",
+					"display_name": "Max MEM",
+					"data_type": "text",
+					"width": "auto",
+					"align": "center"
+				},
+				{
+					"name": "Avg MEM",
+					"display_name": "Avg MEM",
 					"data_type": "text",
 					"width": "auto",
 					"align": "center"
@@ -61,9 +89,42 @@ func AssembleMessage(rows string) string {
 	return message
 }
 
-func SendMessage(webhookURL, message string) error {
+func SendCardMessage(webhookURL, message string) error {
 	// 构造请求体的JSON数据
 	jsonData := fmt.Sprintf(`{"msg_type":"interactive","card":%s}`, message)
+	fmt.Println(jsonData)
+	reqBody := bytes.NewBufferString(jsonData)
+
+	// 创建HTTP请求
+	req, err := http.NewRequest(http.MethodPost, webhookURL, reqBody)
+	if err != nil {
+		return err
+	}
+
+	// 设置请求头
+	req.Header.Set("Content-Type", "application/json")
+
+	// 发送请求
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// 读取并打印响应体
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Response:", string(responseBody))
+	return nil
+}
+
+func SendTextMessage(webhookURL, message string) error {
+	// 构造请求体的JSON数据
+	jsonData := fmt.Sprintf(`{"msg_type":"text","content":{"text":"%s"}}`, message)
 	fmt.Println(jsonData)
 	reqBody := bytes.NewBufferString(jsonData)
 

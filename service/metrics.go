@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/codegen"
@@ -40,6 +41,34 @@ func (m *Metrics) Monitor() {
 			})
 		}
 		time.Sleep(1 * time.Second)
+	}
+}
+
+func (m *Metrics) ReportFeiShu(webhookURL string) {
+	for {
+		for _, service := range common.ServiceList {
+			metrics := m.GetMetric(service)
+			// 当cpu或者mem超过max的50%时，且次数达到60次时，发送消息
+			count := 0
+
+			cpu, _ := strconv.ParseFloat(*metrics.Cpu, 64)
+			mem, _ := strconv.ParseFloat(*metrics.Mem, 64)
+			maxCPU, _ := strconv.ParseFloat(*metrics.MaxCpu, 64)
+			maxMem, _ := strconv.ParseFloat(*metrics.MaxMem, 64)
+
+			if cpu > maxCPU*0.5 || mem > maxMem*0.5 {
+				count++
+				if count == 60 {
+					message := strings.Join([]string{
+						"Service: ", service, " CPU/MEM 超过阈值",
+						"CPU: ", *metrics.Cpu, " MEM: ", *metrics.Mem,
+					}, "")
+					_ = utils.SendTextMessage(webhookURL, message)
+					count = 0
+				}
+			}
+		}
+		time.Sleep(5 * time.Second)
 	}
 }
 
