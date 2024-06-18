@@ -44,30 +44,33 @@ func (m *Metrics) Monitor() {
 }
 
 func (m *Metrics) ReportFeiShu(webhookURL string) {
-	// for {
-	// 	for _, service := range common.ServiceList {
-	// 		metrics := m.GetMetric(service)
-	// 		count := 0
+	for {
+		count := 0
+		stopMonitorChan := make(chan string)
+		for _, service := range common.ServiceList {
+			select {
+			case <-stopMonitorChan:
+				continue
+			default:
+				metrics := m.GetMetric(service)
 
-	// 		cpu, _ := strconv.ParseFloat(*metrics.Cpu, 64)
-	// 		mem, _ := strconv.ParseFloat(*metrics.Mem, 64)
-	// 		maxCPU, _ := strconv.ParseFloat(*metrics.MaxCpu, 64)
-	// 		maxMem, _ := strconv.ParseFloat(*metrics.MaxMem, 64)
+				cpu, _ := strconv.ParseFloat(*metrics.Cpu, 64)
+				mem, _ := strconv.ParseFloat(*metrics.Mem, 64)
+				avgCPU, _ := strconv.ParseFloat(*metrics.AvgCpu, 64)
+				avgMem, _ := strconv.ParseFloat(*metrics.AvgMem, 64)
 
-	// 		if cpu > maxCPU*0.5 || mem > maxMem*0.5 {
-	// 			count++
-	// 			if count == 60 {
-	// 				message := strings.Join([]string{
-	// 					"Service: ", service, " CPU/MEM 超过阈值",
-	// 					"CPU: ", *metrics.Cpu, " MEM: ", *metrics.Mem,
-	// 				}, "")
-	// 				_ = utils.SendTextMessage(webhookURL, message)
-	// 				count = 0
-	// 			}
-	// 		}
-	// 	}
-	// 	time.Sleep(5 * time.Second)
-	// }
+				if cpu > avgCPU*0.5 || mem > avgMem*0.5 {
+					count++
+					if count == 60 {
+						message := fmt.Sprintf("Service: %s CPU/MEM 超过阈值 CPU: %s MEM: %s", service, *metrics.Cpu, *metrics.Mem)
+						_ = utils.SendTextMessage(webhookURL, message)
+						stopMonitorChan <- service
+					}
+				}
+			}
+		}
+		time.Sleep(5 * time.Second)
+	}
 }
 
 func (m *Metrics) GetMetric(serviceName string) codegen.Metric {

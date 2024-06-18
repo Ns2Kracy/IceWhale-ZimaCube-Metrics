@@ -42,10 +42,9 @@ func main() {
 	dbFlag := flag.String("db", "", "db path")
 	reportFlag := flag.Bool("r", false, "report")
 	versionFlag := flag.Bool("v", false, "version")
+	webhookFlag := flag.String("webhook", "", "webhook url")
 
 	flag.Parse()
-
-	webhookURL := os.Getenv("WEBHOOK_URL")
 
 	if *versionFlag {
 		fmt.Printf("v%s\n", common.Version)
@@ -100,7 +99,7 @@ func main() {
 		service.MyService.Metrics().Monitor()
 	}()
 	if *reportFlag {
-		go service.MyService.Metrics().ReportFeiShu(webhookURL)
+		go service.MyService.Metrics().ReportFeiShu(*webhookFlag)
 	}
 
 	router := route.GetRouter()

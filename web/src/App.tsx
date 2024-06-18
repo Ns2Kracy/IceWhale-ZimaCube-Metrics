@@ -1,9 +1,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-import ZimaCube from "./components/Cube";
+import ZimaCube from "./components/ZimaCube";
 
-const baseURL = "http://10.0.0.85";
+const baseURL = "http://localhost";
 const metricsAPI = `${baseURL}/v2/metrics/`;
 
 function App() {
