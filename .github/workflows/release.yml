@@ -1,20 +1,81 @@
+
 name: goreleaser
 
 on:
   push:
     tags:
       - v*.*.*
-env:
-  casaos_cache_version: 1.1 # the value define by causal. the field for to clear the GitHub Action cache
 
 permissions:
   contents: write
+
 jobs:
-  call-workflow-passing-data:
-    uses: IceWhaleTech/github/.github/workflows/go_release.yml@main
-    with:
-      project-name: CasaOS-AppManagement
-      file-name: casaos-app-management
-    secrets:
-      OSS_KEY_ID: ${{ secrets.OSS_KEY_ID }}
-      OSS_KEY_SECRET: ${{ secrets.OSS_KEY_SECRET }}
+  goreleaser:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install dependencies for cross-compiling
+        run: |
+          sudo apt update 
+          sudo apt-get --no-install-recommends --yes install \
+            upx libc6-dev-amd64-cross \
+            gcc-aarch64-linux-gnu libc6-dev-arm64-cross \
+            gcc-arm-linux-gnueabihf libc6-dev-armhf-cross
+            
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch all tags
+        run: git fetch --force --tags
+
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+
+      # install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      # setup node
+      - name: Setup Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          cache-dependency-path: web/pnpm-lock.yaml
+          node-version: lts/iron
+          cache: 'pnpm'
+
+      # install dependencies
+      - name: Install dependencies
+        working-directory: ./web
+        run: |
+          pnpm install
+      
+      - name: Build app
+        working-directory: ./web
+        run: |
+          pnpm build
+
+      - name: Generate code
+        run: |
+          go generate
+      
+      - name: Build Backend
+        run: |
+          go build -o ./raw/usr/bin/casaos-debugger ./main.go
+
+      - name: build modules file
+        run: |
+          mksquashfs raw/ casaos-debugger.raw
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: casaos-debugger.raw

@@ -8,18 +8,11 @@ import {
 	TableHeader,
 	TableRow,
 } from "@nextui-org/react";
+import type { components } from "../api/openapi";
 
-interface Metrics {
-	name: string;
-	cpu: string;
-	avg_cpu: string;
-	max_cpu: string;
-	mem: string;
-	avg_mem: string;
-	max_mem: string;
-}
-
-export default function ZimaCube(props: { metrics: Metrics[] }) {
+export default function ZimaCube(props: {
+	metrics: components["responses"]["ResponseZimaCubeMetricsOK"]["data"][];
+}) {
 	return (
 		<Accordion>
 			<AccordionItem title="ZimaCube:">
@@ -34,18 +27,19 @@ export default function ZimaCube(props: { metrics: Metrics[] }) {
 						<TableColumn>最大内存</TableColumn>
 					</TableHeader>
 					<TableBody>
-						{props.metrics.map((item: Metrics, index: number) => (
-							// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-							<TableRow key={index}>
-								<TableCell>{item.name}</TableCell>
-								<TableCell>{item.cpu}</TableCell>
-								<TableCell>{item.avg_cpu}</TableCell>
-								<TableCell>{item.max_cpu}</TableCell>
-								<TableCell>{item.mem}</TableCell>
-								<TableCell>{item.avg_mem}</TableCell>
-								<TableCell>{item.max_mem}</TableCell>
-							</TableRow>
-						))}
+						{props.metrics.map(
+							(item: components["responses"]["ResponseZimaCubeMetricsOK"]) => (
+								<TableRow key={item.data.name}>
+									<TableCell>{item.data.name}</TableCell>
+									<TableCell>{item.data.currentCpu}</TableCell>
+									<TableCell>{item.data.avgCpu}</TableCell>
+									<TableCell>{item.data.maxCpu}</TableCell>
+									<TableCell>{item.data.currentMemory}</TableCell>
+									<TableCell>{item.data.avgMemory}</TableCell>
+									<TableCell>{item.data.maxMemory}</TableCell>
+								</TableRow>
+							),
+						)}
 					</TableBody>
 				</Table>
 			</AccordionItem>

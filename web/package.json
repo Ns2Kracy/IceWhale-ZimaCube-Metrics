@@ -5,24 +5,28 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --emptyOutDir",
     "preview": "vite preview",
     "format": "biome format --write .",
     "check": "biome check --apply ."
   },
   "dependencies": {
     "@nextui-org/react": "^2.4.1",
+    "@tanstack/react-query": "^5.45.1",
     "axios": "^1.7.2",
     "framer-motion": "^11.2.10",
+    "openapi-fetch": "^0.9.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.1",
+    "@types/node": "^20.14.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.19",
+    "openapi-typescript": "^6.7.6",
     "postcss": "^8.4.38",
     "postcss-import": "^16.1.0",
     "tailwindcss": "^3.4.4",
