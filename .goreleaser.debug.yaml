@@ -5,10 +5,10 @@ before:
   hooks:
     - go generate
     - go run github.com/google/go-licenses@latest check . --disallowed_types=restricted
-    - go mod tidy
+    - go mod tidy -v
     - go test -race -v ./... -timeout 30m
 builds:
-  - id: icewhale-zimacube-metrics-amd64
+  - id: zimacube-metrics-amd64
     binary: build/sysroot/usr/bin/zimacube-metrics
     env:
       - CC=x86_64-linux-gnu-gcc
@@ -17,7 +17,6 @@ builds:
     ldflags:
       - -X main.commit={{.Commit}}
       - -X main.date={{.Date}}
-      - -extldflags "-static"
     tags:
       - musl
       - netgo
@@ -30,9 +29,9 @@ builds:
 archives:
   - name_template: >-
       {{ .Os }}-{{- if eq .Arch "arm" }}arm-7{{- else }}{{ .Arch }}{{- end }}-{{ .ProjectName }}-v{{ .Version }}
-    id: icewhale-zimacube-metrics
+    id: zimacube-metrics
     builds:
-      - icewhale-zimacube-metrics-amd64
+      - zimacube-metrics-amd64
     files:
       - build/**/*
 checksum:

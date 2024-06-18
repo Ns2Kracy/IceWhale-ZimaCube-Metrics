@@ -1,4 +1,4 @@
-//go:generate bash -c "mkdir -p codegen && go run github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen@v2.1.0 -generate types,server,spec -package codegen api/zimacube-metrics/openapi.yaml > codegen/zimacube_monitoring_api.go"
+//go:generate bash -c "mkdir -p codegen && go run github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen@v2.1.0 -generate types,server,spec -package codegen api/zimacube-metrics/openapi.yaml > codegen/zimacube_metrics_api.go"
 
 package main
 
@@ -95,7 +95,10 @@ func main() {
 	}
 
 	service.MyService.Metrics().DB = sqliteDB
-	go service.MyService.Metrics().Monitor()
+	go func() {
+		time.After(5 * time.Second)
+		service.MyService.Metrics().Monitor()
+	}()
 	if *reportFlag {
 		go service.MyService.Metrics().ReportFeiShu(webhookURL)
 	}

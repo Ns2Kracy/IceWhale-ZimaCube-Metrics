@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/codegen"
@@ -45,36 +44,35 @@ func (m *Metrics) Monitor() {
 }
 
 func (m *Metrics) ReportFeiShu(webhookURL string) {
-	for {
-		for _, service := range common.ServiceList {
-			metrics := m.GetMetric(service)
-			// 当cpu或者mem超过max的50%时，且次数达到60次时，发送消息
-			count := 0
+	// for {
+	// 	for _, service := range common.ServiceList {
+	// 		metrics := m.GetMetric(service)
+	// 		count := 0
 
-			cpu, _ := strconv.ParseFloat(*metrics.Cpu, 64)
-			mem, _ := strconv.ParseFloat(*metrics.Mem, 64)
-			maxCPU, _ := strconv.ParseFloat(*metrics.MaxCpu, 64)
-			maxMem, _ := strconv.ParseFloat(*metrics.MaxMem, 64)
+	// 		cpu, _ := strconv.ParseFloat(*metrics.Cpu, 64)
+	// 		mem, _ := strconv.ParseFloat(*metrics.Mem, 64)
+	// 		maxCPU, _ := strconv.ParseFloat(*metrics.MaxCpu, 64)
+	// 		maxMem, _ := strconv.ParseFloat(*metrics.MaxMem, 64)
 
-			if cpu > maxCPU*0.5 || mem > maxMem*0.5 {
-				count++
-				if count == 60 {
-					message := strings.Join([]string{
-						"Service: ", service, " CPU/MEM 超过阈值",
-						"CPU: ", *metrics.Cpu, " MEM: ", *metrics.Mem,
-					}, "")
-					_ = utils.SendTextMessage(webhookURL, message)
-					count = 0
-				}
-			}
-		}
-		time.Sleep(5 * time.Second)
-	}
+	// 		if cpu > maxCPU*0.5 || mem > maxMem*0.5 {
+	// 			count++
+	// 			if count == 60 {
+	// 				message := strings.Join([]string{
+	// 					"Service: ", service, " CPU/MEM 超过阈值",
+	// 					"CPU: ", *metrics.Cpu, " MEM: ", *metrics.Mem,
+	// 				}, "")
+	// 				_ = utils.SendTextMessage(webhookURL, message)
+	// 				count = 0
+	// 			}
+	// 		}
+	// 	}
+	// 	time.Sleep(5 * time.Second)
+	// }
 }
 
 func (m *Metrics) GetMetric(serviceName string) codegen.Metric {
 	var metrics model.MetricDBModel
-	m.DB.Where("name = ?", serviceName).Last(&metrics)
+	m.DB.Where("name = ?", serviceName).Order("created_at desc").Last(&metrics)
 
 	name := metrics.Name
 	cpu := metrics.CPU + "%"
@@ -98,7 +96,7 @@ func (m *Metrics) GetMetric(serviceName string) codegen.Metric {
 func (m *Metrics) GetMaxCPU(serviceName string) string {
 	var metrics model.MetricDBModel
 	// Get the max cpu and mem from the database in the last 1 hour
-	m.DB.Where("name = ? AND created_at > ?", serviceName, time.Now().Add(-1*time.Hour)).Order("cpu desc").First(&metrics)
+	m.DB.Where("name = ?", serviceName).Order("cpu desc").First(&metrics)
 
 	maxCPU, _ := strconv.ParseFloat(metrics.CPU, 64)
 
@@ -117,8 +115,8 @@ func (m *Metrics) GetAvgCPU(serviceName string) string {
 
 func (m *Metrics) GetMaxMem(serviceName string) string {
 	var metrics model.MetricDBModel
-	// Get the max cpu and mem from the database in the last 5 minutes
-	m.DB.Where("name = ? AND created_at > ?", serviceName, time.Now().Add(-5*time.Minute)).Order("mem desc").First(&metrics)
+	// Get the max mem from the database
+	m.DB.Where("name = ?", serviceName).Order("mem desc").First(&metrics)
 
 	maxMem, _ := strconv.ParseFloat(metrics.MEM, 64)
 
@@ -143,4 +141,7 @@ func (m *Metrics) GetMetrics() []codegen.Metric {
 	}
 
 	return metrics
+}
+
+func (m *Metrics) AddSshClient(params codegen.AddZimaCube) {
 }

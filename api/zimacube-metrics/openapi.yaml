@@ -28,6 +28,39 @@ paths:
           $ref: "#/components/responses/ResponeBadRequest"
         "500":
           $ref: "#/components/responses/ResponseInternalServerError"
+    post:
+      summary: Add a ssh host to monitor
+      operationId: postAddZimaCube
+      tags:
+        - ZimaCube Metrics
+      requestBody:
+        $ref: "#/components/requestBodies/AddZimaCube"
+      responses:
+        "200":
+          $ref: "#/components/responses/ResponseOK"
+        "400":
+          $ref: "#/components/responses/ResponeBadRequest"
+        "500":
+          $ref: "#/components/responses/ResponseInternalServerError"
+    delete:
+      summary: Delete a ssh connection from monitoring
+      operationId: deleteZimaCube
+      tags:
+        - ZimaCube Metrics
+      parameters:
+        - name: ip
+          in: query
+          description: IP address of the server
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/ResponseOK"
+        "400":
+          $ref: "#/components/responses/ResponeBadRequest"
+        "500":
+          $ref: "#/components/responses/ResponseInternalServerError"
 
 components:
   securitySchemes:
@@ -35,6 +68,30 @@ components:
       type: apiKey
       in: header
       name: Authorization
+    
+  requestBodies: 
+    AddZimaCube:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              ip:
+                type: string
+                description: IP address of the server
+                example: "10.0.0.85"
+              port:
+                type: integer
+                description: Port of the server
+                example: 22
+              username:
+                type: string
+                description: Username of the server
+                example: "root"
+              password:
+                type: string
+                description: Password of the server
+                example: "password"
 
   responses:
     ResponseOK:
@@ -99,10 +156,6 @@ components:
           description: CPU usage of the server
           type: string
           example: 0.5%
-        mem:
-          description: Memory usage of the server
-          type: string
-          example: 0.5%
         max_cpu:
           description: Maximum CPU usage of the server in the last 1 hour
           type: string
@@ -111,6 +164,10 @@ components:
           description: Average CPU usage of the server in the last 1 hour
           type: string
           example: 5%
+        mem:
+          description: Memory usage of the server
+          type: string
+          example: 0.5%
         max_mem:
           description: Maximum Memory usage of the server in the last 1 hour
           type: string

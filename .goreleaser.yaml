@@ -8,7 +8,7 @@ before:
     - go mod tidy
     - go test -race -v ./... -timeout 30m
 builds:
-  - id: icewhale-zimacube-metrics-amd64
+  - id: zimacube-metrics-amd64
     binary: build/sysroot/usr/bin/zimacube-metrics
     env:
       - CC=x86_64-linux-gnu-gcc
@@ -30,9 +30,9 @@ builds:
 archives:
   - name_template: >-
       {{ .Os }}-{{- if eq .Arch "arm" }}arm-7{{- else }}{{ .Arch }}{{- end }}-{{ .ProjectName }}-v{{ .Version }}
-    id: icewhale-zimacube-metrics
+    id: zimacube-metrics
     builds:
-      - icewhale-zimacube-metrics-amd64
+      - zimacube-metrics-amd64
     files:
       - build/**/*
 
