@@ -1,4 +1,3 @@
-
 name: goreleaser
 
 on:
@@ -20,7 +19,7 @@ jobs:
             upx libc6-dev-amd64-cross \
             gcc-aarch64-linux-gnu libc6-dev-arm64-cross \
             gcc-arm-linux-gnueabihf libc6-dev-armhf-cross
-            
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -49,14 +48,14 @@ jobs:
         with:
           cache-dependency-path: web/pnpm-lock.yaml
           node-version: lts/iron
-          cache: 'pnpm'
+          cache: "pnpm"
 
       # install dependencies
       - name: Install dependencies
         working-directory: ./web
         run: |
           pnpm install
-      
+
       - name: Build app
         working-directory: ./web
         run: |
@@ -65,17 +64,17 @@ jobs:
       - name: Generate code
         run: |
           go generate
-      
+
       - name: Build Backend
         run: |
-          go build -o ./raw/usr/bin/casaos-debugger ./main.go
+          go build -o ./raw/usr/bin/zimacube-metrics ./main.go
 
       - name: build modules file
         run: |
-          mksquashfs raw/ casaos-debugger.raw
+          mksquashfs raw/ zimacube-metrics.raw
 
       - name: Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: casaos-debugger.raw
+          files: zimacube-metrics.raw
