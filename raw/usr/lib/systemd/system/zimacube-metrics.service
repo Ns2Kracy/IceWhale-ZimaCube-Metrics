@@ -1,11 +1,12 @@
 [Unit]
 After=casaos-gateway.service
-Description=IceWhale ZimaCube Metrics Service
+After=casaos-message-bus.service
+After=zimaos-user.service
+Description=A Debug Tool for ZimaCube
 
 [Service]
-ExecStart=/usr/bin/zimacube-metrics
+ExecStart=/usr/bin/zimacube-metrics -r true -w https://open.feishu.cn/open-apis/bot/v2/hook/6412c409-2e2b-428f-b694-3dd4ebfba28e
 Restart=always
-Type=notify
 
 [Install]
 WantedBy=multi-user.target

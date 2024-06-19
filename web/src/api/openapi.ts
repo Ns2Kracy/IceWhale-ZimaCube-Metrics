@@ -65,6 +65,11 @@ export interface components {
        * @example 5%
        */
       avg_mem?: string;
+      /**
+       * @description Uptime of the service
+       * @example 1 day 2 hours 3 minutes
+       */
+      uptime?: string;
     };
   };
   responses: {
@@ -88,7 +93,6 @@ export interface components {
     };
     /** @description Metrics of ZimaCube */
     ResponseZimaCubeMetricsOK: {
-	  data: any;
       content: {
         "application/json": components["schemas"]["BaseResponse"] & {
           data?: components["schemas"]["Metric"][];

@@ -21,6 +21,7 @@ export default function ZimaCube(props: {
 				<TableColumn>当前内存</TableColumn>
 				<TableColumn>平均内存</TableColumn>
 				<TableColumn>最大内存</TableColumn>
+				<TableColumn>运行时间</TableColumn>
 			</TableHeader>
 			<TableBody>
 				{props.metrics.map((item) => (
@@ -32,6 +33,7 @@ export default function ZimaCube(props: {
 						<TableCell>{item.mem}</TableCell>
 						<TableCell>{item.avg_mem}</TableCell>
 						<TableCell>{item.max_mem}</TableCell>
+						<TableCell>{item.uptime}</TableCell>
 					</TableRow>
 				))}
 			</TableBody>

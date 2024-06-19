@@ -19,6 +19,7 @@ import (
 	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/common"
 	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/config"
 	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/pkg/sqlite"
+	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/pkg/utils"
 	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/route"
 	"github.com/Ns2Kracy/IceWhale-ZimaCube-Metrics/service"
 	"go.uber.org/zap"
@@ -41,8 +42,12 @@ var (
 func main() {
 	dbFlag := flag.String("db", "", "db path")
 	reportFlag := flag.Bool("r", false, "report")
+	// cpu阈值flag
+	cpuFlag := flag.Float64("c", 0.8, "cpu threshold")
+	// 内存阈值flag
+	memFlag := flag.Float64("m", 0.8, "memory threshold")
 	versionFlag := flag.Bool("v", false, "version")
-	webhookFlag := flag.String("webhook", "", "webhook url")
+	webhookFlag := flag.String("w", "", "webhook url")
 
 	flag.Parse()
 
@@ -94,12 +99,14 @@ func main() {
 	}
 
 	service.MyService.Metrics().DB = sqliteDB
+
 	go func() {
 		time.After(5 * time.Second)
 		service.MyService.Metrics().Monitor()
 	}()
+
 	if *reportFlag {
-		go service.MyService.Metrics().ReportFeiShu(*webhookFlag)
+		go service.MyService.Metrics().ReportFeiShu(*webhookFlag, *cpuFlag, *memFlag)
 	}
 
 	router := route.GetRouter()
@@ -121,4 +128,6 @@ func main() {
 	if _err != nil {
 		panic(_err)
 	}
+
+	defer utils.CleanUp()
 }

@@ -31,19 +31,20 @@ func (m *Metrics) Monitor() {
 				continue
 			}
 
-			cpu, mem := utils.GetProcessInfo(pid)
+			cpu, mem, uptime := utils.GetProcessInfo(pid)
 
 			m.DB.Create(&model.MetricDBModel{
-				Name: service,
-				CPU:  cpu,
-				MEM:  mem,
+				Name:   service,
+				CPU:    cpu,
+				MEM:    mem,
+				Uptime: uptime,
 			})
 		}
 		time.Sleep(1 * time.Second)
 	}
 }
 
-func (m *Metrics) ReportFeiShu(webhookURL string) {
+func (m *Metrics) ReportFeiShu(webhookURL string, cpuThreshold, memThreshold float64) {
 	for {
 		count := 0
 		stopMonitorChan := make(chan string)
@@ -84,6 +85,7 @@ func (m *Metrics) GetMetric(serviceName string) codegen.Metric {
 	maxCPI := m.GetMaxCPU(serviceName)
 	avgMem := m.GetAvgMem(serviceName)
 	maxMem := m.GetMaxMem(serviceName)
+	uptime := metrics.Uptime
 
 	return codegen.Metric{
 		Name:   &name,
@@ -93,6 +95,7 @@ func (m *Metrics) GetMetric(serviceName string) codegen.Metric {
 		MaxCpu: &maxCPI,
 		AvgMem: &avgMem,
 		MaxMem: &maxMem,
+		Uptime: &uptime,
 	}
 }
 

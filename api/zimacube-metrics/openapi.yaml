@@ -68,8 +68,8 @@ components:
       type: apiKey
       in: header
       name: Authorization
-    
-  requestBodies: 
+
+  requestBodies:
     AddZimaCube:
       content:
         application/json:
@@ -120,9 +120,9 @@ components:
       content:
         application/json:
           schema:
-            allOf: 
+            allOf:
               - $ref: "#/components/schemas/BaseResponse"
-              - properties: 
+              - properties:
                   data:
                     type: array
                     items:
@@ -176,3 +176,7 @@ components:
           description: Average Memory usage of the server in the last 1 hour
           type: string
           example: 5%
+        uptime:
+          description: Uptime of the service
+          type: string
+          example: "1 day 2 hours 3 minutes"
