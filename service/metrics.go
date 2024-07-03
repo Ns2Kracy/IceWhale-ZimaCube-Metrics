@@ -31,13 +31,13 @@ func (m *Metrics) Monitor() {
 				continue
 			}
 
-			cpu, mem, uptime := utils.GetProcessInfo(pid)
+			pi := utils.GetProcessInfo(pid)
 
 			m.DB.Create(&model.MetricDBModel{
 				Name:   service,
-				CPU:    cpu,
-				MEM:    mem,
-				Uptime: uptime,
+				CPU:    pi["cpu"],
+				MEM:    pi["mem"],
+				Uptime: pi["uptime"],
 			})
 		}
 		time.Sleep(1 * time.Second)

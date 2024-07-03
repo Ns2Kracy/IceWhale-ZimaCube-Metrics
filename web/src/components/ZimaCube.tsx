@@ -22,6 +22,7 @@ export default function ZimaCube(props: {
 				<TableColumn>平均内存</TableColumn>
 				<TableColumn>最大内存</TableColumn>
 				<TableColumn>运行时间</TableColumn>
+				<TableColumn>系统温度</TableColumn>
 			</TableHeader>
 			<TableBody>
 				{props.metrics.map((item) => (
